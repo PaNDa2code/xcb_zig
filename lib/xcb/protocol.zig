@@ -15,7 +15,7 @@ pub const Enum = @import("protocol/enum.zig");
 pub const Error = @import("protocol/error.zig");
 pub const Event = @import("protocol/event.zig");
 pub const EventStruct = @import("protocol/eventstruct.zig");
-pub usingnamespace @import("protocol/field.zig");
+pub const Field = @import("protocol/field.zig");
 pub const Request = @import("protocol/request.zig");
 pub const Struct = @import("protocol/struct.zig");
 pub const Union = @import("protocol/union.zig");

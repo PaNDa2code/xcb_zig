@@ -1,0 +1,6 @@
+[submodule "external/libxau.zig"]
+  path = external/libxau.zig
+  url = https://github.com/PaNDa2code/libxau_zig
+[submodule "external/zig-clap"]
+	path = external/zig-clap
+	url = https://github.com/Hejsil/zig-clap
