@@ -35,13 +35,13 @@ pub fn build(b: *std.Build) !void {
 
     const python3_path = try b.findProgram(&.{ "python3", "python" }, &.{});
 
-    const libxcb_mod = b.createModule(.{
-        .target = target,
-        .optimize = optimize,
-    });
     const libxcb = b.addLibrary(.{
         .name = "xcb",
-        .root_module = libxcb_mod,
+        .root_module = b.createModule(.{
+            .target = target,
+            .optimize = optimize,
+        }),
+        .linkage = linkage,
     });
 
     libxcb.linkLibC();
@@ -66,7 +66,7 @@ pub fn build(b: *std.Build) !void {
 
             py.setCwd(libxcb_upstream.path("src"));
 
-            // not the greatest but works
+            // not the best but works
             const cat_c = b.addSystemCommand(&.{"cat"});
             cat_c.setCwd(py.cwd.?);
             cat_c.addArg(c_file_basename);
@@ -140,6 +140,73 @@ pub fn build(b: *std.Build) !void {
     libxcb.addIncludePath(headers.getDirectory());
 
     b.installArtifact(libxcb);
+
+    const libxcb_shm = b.addLibrary(.{
+        .name = "xcb-shm",
+        .root_module = b.createModule(.{
+            .target = target,
+            .optimize = optimize,
+            .link_libc = true,
+        }),
+        .linkage = linkage,
+    });
+
+    libxcb_shm.addIncludePath(libxcb_upstream.path("src"));
+    libxcb_shm.addIncludePath(libxcb_upstream.path("include"));
+    libxcb_shm.addIncludePath(xorgproto_upstream.path("include"));
+    libxcb_shm.addIncludePath(headers.getDirectory());
+
+    libxcb_shm.addCSourceFiles(.{
+        .root = libxcb_upstream.path("src"),
+        .files = &.{ "shm.c", "xinerama.c" },
+    });
+
+    libxcb_shm.linkLibrary(libxcb);
+    b.installArtifact(libxcb_shm);
+
+    const xcb_util = b.addLibrary(.{
+        .name = "xcb-util",
+        .root_module = b.createModule(.{
+            .target = target,
+            .optimize = optimize,
+            .link_libc = true,
+        }),
+        .linkage = linkage,
+    });
+
+    xcb_util.addIncludePath(headers.getDirectory());
+    xcb_util.addCSourceFiles(.{
+        .root = xcb_util_upstream.path("src"),
+        .files = &.{
+            "atoms.c",
+            "event.c",
+            "xcb_aux.c",
+        },
+    });
+
+    b.installArtifact(xcb_util);
+
+    const xcb_image = b.addLibrary(.{
+        .name = "xcb-image",
+        .root_module = b.createModule(.{
+            .target = target,
+            .optimize = optimize,
+            .link_libc = true,
+        }),
+        .linkage = linkage,
+    });
+
+    xcb_image.addIncludePath(headers.getDirectory());
+    xcb_image.addCSourceFiles(.{
+        .root = xcb_util_image_upstream.path("image"),
+        .files = &.{
+            "xcb_image.c",
+        },
+    });
+
+    xcb_image.linkLibrary(xcb_util);
+    xcb_image.linkLibrary(libxcb_shm);
+    b.installArtifact(xcb_image);
 }
 
 fn cwdOutFile(b: *Build, run: *Build.Step.Run, basename: []const u8) Build.LazyPath {
