@@ -5,13 +5,6 @@
     .minimum_zig_version = "0.14.0",
     .paths = .{""},
     .dependencies = .{
-        .clap = .{
-            .path = "./external/zig-clap",
-        },
-        .libxau = .{
-            .path = "./external/libxau.zig",
-        },
-
         .libxcb = .{
             .url = "https://gitlab.freedesktop.org/xorg/lib/libxcb/-/archive/libxcb-1.16/libxcb-libxcb-1.16.tar.gz",
             .hash = "N-V-__8AAKlsCQDGwfVRbQ_hynL1OR9_APMRTAdhzt7Mvutd",
@@ -31,6 +24,14 @@
         .xproto = .{
             .url = "https://gitlab.freedesktop.org/xorg/proto/xcbproto/-/archive/xcb-proto-1.16.0/xcbproto-xcb-proto-1.16.0.tar.gz",
             .hash = "N-V-__8AAAPHDACIhYv6E_mQYDRA87E6oCer-oKN6HVJf8tY",
+        },
+        .clap = .{
+            .url = "https://github.com/Hejsil/zig-clap/archive/refs/tags/0.11.0.tar.gz",
+            .hash = "clap-0.11.0-oBajB-HnAQDPCKYzwF7rO3qDFwRcD39Q0DALlTSz5H7e",
+        },
+        .libxau = .{
+            .url = "https://github.com/PaNDa2code/libxau_zig/archive/0e129be42205a99d329b3737476a0dc828857779.tar.gz",
+            .hash = "libxau-1.0.11-kZh3fMiRAAAjO0giWUHQ2CR4jvq-6ThU46cz1eNx7ZnE",
         },
     },
 }
