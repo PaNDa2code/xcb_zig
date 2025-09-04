@@ -5,7 +5,9 @@
     .minimum_zig_version = "0.14.0",
     .paths = .{""},
     .dependencies = .{
-        .clap = .{ .path = "./external/zig-clap" },
+        .clap = .{
+            .path = "./external/zig-clap",
+        },
         .libxau = .{
             .path = "./external/libxau.zig",
         },
