@@ -71,6 +71,8 @@ pub fn build(b: *std.Build) !void {
             cat_c.setCwd(py.cwd.?);
             cat_c.addArg(c_file_basename);
 
+            cat_c.step.dependOn(&py.step);
+
             const c_file = cat_c.captureStdOut();
             cat_c.captured_stdout.?.basename = c_file_basename;
 
