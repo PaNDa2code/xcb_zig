@@ -229,7 +229,7 @@ pub fn build(b: *std.Build) !void {
             "Write.c",
         },
         .flags = &.{
-            "-DHAVE_ARC4RANDOM_BUF",
+            if (linkage == .dynamic) "-DHAVE_ARC4RANDOM_BUF" else "",
         },
     });
 
