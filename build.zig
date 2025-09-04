@@ -32,6 +32,7 @@ pub fn build(b: *std.Build) !void {
 
     const xcb_util_upstream = b.dependency("xcb-util", .{});
     const xcb_util_image_upstream = b.dependency("xcb-util-image", .{});
+    const libxdmcp_upstream = b.dependency("libXdmcp", .{});
 
     const python3_path = try b.findProgram(&.{ "python3", "python" }, &.{});
 
@@ -47,8 +48,10 @@ pub fn build(b: *std.Build) !void {
     libxcb.linkLibC();
 
     const headers = b.addWriteFiles();
-
     {
+        const xcbgen = xcbproto_upstream.path("xcbgen");
+        const xcbgen_path = xcbgen.getPath3(b, null).root_dir.path.?;
+
         const c_client_py = libxcb_upstream.path("src/c_client.py");
         const sources = b.addWriteFiles();
 
@@ -60,6 +63,7 @@ pub fn build(b: *std.Build) !void {
 
             const py = b.addSystemCommand(&.{python3_path});
             py.addFileArg(c_client_py);
+            py.setEnvironmentVariable("PYTHONPATH", xcbgen_path);
 
             py.addArgs(&.{ "-c", "libxcb", "-l", "libxcb", "-s", "3", "-p" });
             py.addDirectoryArg(xcbproto_upstream.path(""));
@@ -201,6 +205,39 @@ pub fn build(b: *std.Build) !void {
 
     libxcb.installHeadersDirectory(headers.getDirectory(), "", .{});
     libxcb.root_module.linkLibrary(xcb_image);
+
+    const libxdmcp = b.addLibrary(.{
+        .name = "Xdmcp",
+        .root_module = b.createModule(.{
+            .target = target,
+            .optimize = optimize,
+            .link_libc = true,
+        }),
+        .linkage = linkage,
+    });
+
+    libxdmcp.root_module.addCSourceFiles(.{
+        .root = libxdmcp_upstream.path(""),
+        .files = &.{
+            "Array.c",
+            "Fill.c",
+            "Flush.c",
+            "Key.c",
+            "Read.c",
+            "Unwrap.c",
+            "Wrap.c",
+            "Write.c",
+        },
+        .flags = &.{
+            "-DHAVE_ARC4RANDOM_BUF",
+        },
+    });
+
+    libxdmcp.root_module.addIncludePath(xorgproto_upstream.path("include"));
+    libxdmcp.root_module.addIncludePath(libxdmcp_upstream.path("include"));
+    libxdmcp.root_module.addIncludePath(headers.getDirectory());
+
+    libxcb.root_module.linkLibrary(libxdmcp);
 
     b.installArtifact(libxcb);
 }

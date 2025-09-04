@@ -33,5 +33,9 @@
             .url = "https://github.com/PaNDa2code/libxau_zig/archive/0e129be42205a99d329b3737476a0dc828857779.tar.gz",
             .hash = "libxau-1.0.11-kZh3fMiRAAAjO0giWUHQ2CR4jvq-6ThU46cz1eNx7ZnE",
         },
+        .libXdmcp = .{
+            .url = "https://gitlab.freedesktop.org/xorg/lib/libxdmcp/-/archive/libXdmcp-1.1.5/libxdmcp-libXdmcp-1.1.5.tar.gz",
+            .hash = "N-V-__8AAHC7AgA7EvtCRM2pOGbGmSYsVrYJoTPjVbUX1_ue",
+        },
     },
 }
