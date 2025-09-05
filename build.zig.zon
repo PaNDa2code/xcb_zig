@@ -1,17 +1,17 @@
 .{
     .name = .xcb,
     .fingerprint = 0x48cfd8eae06c78ea,
-    .version = "0.1.16",
+    .version = "0.1.17",
     .minimum_zig_version = "0.14.0",
     .paths = .{""},
     .dependencies = .{
         .libxcb = .{
-            .url = "https://gitlab.freedesktop.org/xorg/lib/libxcb/-/archive/libxcb-1.16/libxcb-libxcb-1.16.tar.gz",
-            .hash = "N-V-__8AAKlsCQDGwfVRbQ_hynL1OR9_APMRTAdhzt7Mvutd",
+            .url = "https://gitlab.freedesktop.org/xorg/lib/libxcb/-/archive/libxcb-1.17.0/libxcb-libxcb-1.17.0.tar.gz",
+            .hash = "N-V-__8AAPZxCQD7JyQLx0_D9J9dnkSoP7iziBVxreTgUqlj",
         },
         .xcbproto = .{
-            .url = "https://gitlab.freedesktop.org/xorg/proto/xcbproto/-/archive/xcb-proto-1.16.0/xcbproto-xcb-proto-1.16.0.tar.gz",
-            .hash = "N-V-__8AAAPHDACIhYv6E_mQYDRA87E6oCer-oKN6HVJf8tY",
+            .url = "https://gitlab.freedesktop.org/xorg/proto/xcbproto/-/archive/xcb-proto-1.17.0/xcbproto-xcb-proto-1.17.0.tar.gz",
+            .hash = "N-V-__8AAFnMDACdXT5YIakLgEMFZ-K7ZICgB18p8xKobHjk",
         },
         .@"xcb-util" = .{
             .url = "https://gitlab.freedesktop.org/xorg/lib/libxcb-util/-/archive/xcb-util-0.4.1/libxcb-util-xcb-util-0.4.1.tar.gz",
@@ -20,10 +20,6 @@
         .@"xcb-util-image" = .{
             .url = "https://gitlab.freedesktop.org/xorg/lib/libxcb-image/-/archive/xcb-util-image-0.4.1/libxcb-image-xcb-util-image-0.4.1.tar.gz",
             .hash = "N-V-__8AAIogAgCSvu0pkKO1X2rXmEFZ4uU-8jcuzTbZXe7a",
-        },
-        .xproto = .{
-            .url = "https://gitlab.freedesktop.org/xorg/proto/xcbproto/-/archive/xcb-proto-1.16.0/xcbproto-xcb-proto-1.16.0.tar.gz",
-            .hash = "N-V-__8AAAPHDACIhYv6E_mQYDRA87E6oCer-oKN6HVJf8tY",
         },
         .clap = .{
             .url = "https://github.com/Hejsil/zig-clap/archive/refs/tags/0.11.0.tar.gz",
