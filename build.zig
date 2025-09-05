@@ -48,22 +48,32 @@ pub fn build(b: *std.Build) !void {
     libxcb.linkLibC();
 
     const headers = b.addWriteFiles();
+    const c_client_sources = b.addWriteFiles();
     {
         const xcbgen = xcbproto_upstream.path("xcbgen");
         const xcbgen_path = xcbgen.getPath3(b, null).root_dir.path.?;
 
         const c_client_py = libxcb_upstream.path("src/c_client.py");
-        const sources = b.addWriteFiles();
+        const c_client_py_wrapper = b.path("script/c_client.py");
 
         for (xml_files) |xml_file_basename| {
             const c_file_basename = b.fmt("{s}.c", .{xml_file_basename[0 .. xml_file_basename.len - 4]});
             const h_file_basename = b.fmt("{s}.h", .{xml_file_basename[0 .. xml_file_basename.len - 4]});
 
+            const PYTHONPATH = b.fmt("{s}:{s}", .{
+                c_client_py.dirname().getPath3(b, null).root_dir.path.?,
+                xcbgen_path,
+            });
             const src_xml_file = b.fmt("src/{s}", .{xml_file_basename});
 
             const py = b.addSystemCommand(&.{python3_path});
-            py.addFileArg(c_client_py);
-            py.setEnvironmentVariable("PYTHONPATH", xcbgen_path);
+            py.setEnvironmentVariable("PYTHONPATH", PYTHONPATH);
+            py.addFileArg(c_client_py_wrapper);
+            py.addPrefixedFileArg("--child-script=", c_client_py);
+
+            // not the best but works
+            const c_file = py.addPrefixedOutputFileArg("--c-output=", c_file_basename);
+            const h_file = py.addPrefixedOutputFileArg("--h-output=", h_file_basename);
 
             py.addArgs(&.{ "-c", "libxcb", "-l", "libxcb", "-s", "3", "-p" });
             py.addDirectoryArg(xcbproto_upstream.path(""));
@@ -71,24 +81,20 @@ pub fn build(b: *std.Build) !void {
 
             py.setCwd(libxcb_upstream.path("src"));
 
-            // not the best but works
-            const c_file = cwdOutFile(b, py, c_file_basename);
-            const h_file = cwdOutFile(b, py, h_file_basename);
-
             _ = headers.addCopyFile(
                 h_file,
                 b.fmt("xcb/{s}", .{h_file_basename}),
             );
 
-            _ = sources.addCopyFile(c_file, c_file_basename);
+            _ = c_client_sources.addCopyFile(c_file, c_file_basename);
         }
 
         libxcb.root_module.addCSourceFiles(.{
-            .root = sources.getDirectory(),
+            .root = c_client_sources.getDirectory(),
             .files = blk: {
-                const files_names = try b.allocator.alloc([]const u8, sources.files.items.len);
+                const files_names = try b.allocator.alloc([]const u8, c_client_sources.files.items.len);
                 for (0..files_names.len) |i|
-                    files_names[i] = sources.files.items[i].sub_path;
+                    files_names[i] = c_client_sources.files.items[i].sub_path;
                 break :blk files_names;
             },
             .flags = &.{
@@ -105,6 +111,8 @@ pub fn build(b: *std.Build) !void {
     );
 
     _ = headers.addCopyFile(libxcb_upstream.path("src/xcb.h"), "xcb/xcb.h");
+    _ = headers.addCopyFile(libxcb_upstream.path("src/xcbext.h"), "xcb/xcbext.h");
+    _ = headers.addCopyFile(libxcb_upstream.path("src/xcbint.h"), "xcb/xcbint.h");
     _ = headers.addCopyFile(xcb_util_upstream.path("src/xcb_atom.h"), "xcb/xcb_atom.h");
     _ = headers.addCopyFile(xcb_util_upstream.path("src/xcb_aux.h"), "xcb/xcb_aux.h");
     _ = headers.addCopyFile(xcb_util_upstream.path("src/xcb_event.h"), "xcb/xcb_event.h");
@@ -131,9 +139,8 @@ pub fn build(b: *std.Build) !void {
         },
     });
 
-    libxcb.root_module.addIncludePath(libxcb_upstream.path("src"));
-    libxcb.root_module.addIncludePath(libxcb_upstream.path("include"));
     libxcb.root_module.addIncludePath(xorgproto_upstream.path("include"));
+    libxcb.root_module.addIncludePath(headers.getDirectory().path(b, "xcb"));
     libxcb.root_module.addIncludePath(headers.getDirectory().path(b, "include"));
 
     libxcb.root_module.linkLibrary(libxau.artifact("Xau"));
@@ -153,12 +160,12 @@ pub fn build(b: *std.Build) !void {
 
     libxcb_shm.root_module.addIncludePath(libxcb_upstream.path("src"));
     libxcb_shm.root_module.addIncludePath(xorgproto_upstream.path("include"));
-    libxcb_shm.root_module.addIncludePath(headers.getDirectory());
+    libxcb_shm.root_module.addIncludePath(headers.getDirectory().path(b, "xcb"));
 
     libxcb_shm.root_module.linkLibrary(libxau.artifact("Xau"));
 
     libxcb_shm.addCSourceFiles(.{
-        .root = libxcb_upstream.path("src"),
+        .root = c_client_sources.getDirectory(),
         .files = &.{ "shm.c", "xinerama.c" },
     });
 
@@ -259,6 +266,7 @@ fn cwdOutFile(b: *Build, run: *Build.Step.Run, basename: []const u8) Build.LazyP
 
     return .{ .generated = .{ .file = &output.generated_file } };
 }
+
 
 const xml_files = [_][]const u8{
     // "xcb.xsd",
